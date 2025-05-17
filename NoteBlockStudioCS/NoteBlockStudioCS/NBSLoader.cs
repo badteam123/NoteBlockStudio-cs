@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 
 namespace NoteBlockStudioCS {
     internal class NBSLoader {
-
         public sbyte Version { get; private set; }
         public sbyte VanillaInstrumentCount { get; private set; }
         public short SongLength { get; private set; }
@@ -28,6 +28,8 @@ namespace NoteBlockStudioCS {
         public short LoopStartTick { get; private set; }
 
         public List<NoteBlock> NoteBlocks { get; private set; }
+
+        public Layer[] layers { get; private set; }
 
         public NBSLoader() {
             NoteBlocks = new List<NoteBlock>();
@@ -106,7 +108,7 @@ namespace NoteBlockStudioCS {
                     }
                 }
 
-                Layer[] Layers = new Layer[LayerCount];
+                layers = new Layer[LayerCount];
 
                 for (int l = 0; l < LayerCount; l++) {
                     length = reader.ReadInt32();
@@ -114,12 +116,9 @@ namespace NoteBlockStudioCS {
                     for (int i = 0; i < length; i++) {
                         tempName = tempName + (char)reader.ReadByte();
                     }
-                    Layers[l] = new Layer(tempName, reader.ReadSByte(), reader.ReadSByte(), reader.ReadByte());
+                    layers[l] = new Layer(tempName, reader.ReadSByte(), reader.ReadSByte(), reader.ReadByte());
+                    Debug.WriteLine(layers[l].Volume);
                 }
-
-                Console.WriteLine(Layers.Length);
-                Console.WriteLine(LayerCount);
-                Console.WriteLine(SongName);
 
             }
         }
@@ -128,28 +127,75 @@ namespace NoteBlockStudioCS {
     internal class NoteBlock {
         public int X;
         public int Y;
-        public sbyte Instrument;
+        public sbyte InstrumentNum;
         public sbyte Key;
         public sbyte Velocity;
         public byte Panning;
         public short Pitch;
 
+        public string Instrument;
+
         public NoteBlock(int x, int y, sbyte instrument, sbyte key, sbyte velocity, byte panning, short pitch) {
             X = x;
             Y = y;
-            Instrument = instrument;
+            InstrumentNum = instrument;
             Key = key;
             Velocity = velocity;
             Pitch = pitch;
+            switch (InstrumentNum) {
+                case 0:
+                    Instrument = "harp";
+                    break;
+                case 1:
+                    Instrument = "dbass";
+                    break;
+                case 2:
+                    Instrument = "bdrum";
+                    break;
+                case 3:
+                    Instrument = "sdrum";
+                    break;
+                case 4:
+                    Instrument = "click";
+                    break;
+                case 5:
+                    Instrument = "guitar";
+                    break;
+                case 6:
+                    Instrument = "flute";
+                    break;
+                case 7:
+                    Instrument = "bell";
+                    break;
+                case 8:
+                    Instrument = "icechime";
+                    break;
+                case 9:
+                    Instrument = "xylobone";
+                    break;
+                case 10:
+                    Instrument = "iron_xylophone";
+                    break;
+                case 11:
+                    Instrument = "cow_bell";
+                    break;
+                case 12:
+                    Instrument = "didgeridoo";
+                    break;
+                case 13:
+                    Instrument = "bit";
+                    break;
+                case 14:
+                    Instrument = "banjo";
+                    break;
+                case 15:
+                    Instrument = "pling";
+                    break;
+            }
         }
 
-        public NoteBlock(NoteBlock copy) {
-            X = copy.X;
-            Y = copy.Y;
-            Instrument = copy.Instrument;
-            Key = copy.Key;
-            Velocity = copy.Velocity;
-            Pitch = copy.Pitch;
+        public NoteBlock(NoteBlock copy) : this(copy.X, copy.Y, copy.InstrumentNum, copy.Key, copy.Velocity, copy.Panning, copy.Pitch) {
+
         }
     }
 
