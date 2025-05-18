@@ -205,6 +205,8 @@ namespace NoteBlockStudioCS {
         public sbyte Volume;
         public byte Stereo;
 
+        public Layer() : this("", 0, 100, 0) { }
+
         public Layer(string name, sbyte locked, sbyte volume, byte stereo) {
             Name = name;
             Locked = locked;

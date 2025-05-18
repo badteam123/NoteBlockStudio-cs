@@ -4,11 +4,13 @@ using System.Diagnostics;
 using System.Timers;
 using Haukcode.HighResolutionTimer;
 using Microsoft.VisualBasic;
+using System.Runtime.CompilerServices;
 
 namespace NoteBlockStudioCS {
     public partial class Form1: Form {
 
         Dictionary<int, Dictionary<int, NoteBlock>> notes = new Dictionary<int, Dictionary<int, NoteBlock>>();
+        List<Layer> layers = new List<Layer>();
 
         List<int> maxIndex = new List<int>();
 
@@ -33,10 +35,12 @@ namespace NoteBlockStudioCS {
 
         int offset = 0;
         int farthestNote = 0;
+        int totalNotes = 0;
 
         int playbackPosition = 0;
         int volume;
         object threadlock = new object();
+        short SongTempo = 1000;
 
         bool playing = false;
 
@@ -47,29 +51,31 @@ namespace NoteBlockStudioCS {
         HighResolutionTimer timer = new HighResolutionTimer();
 
         public enum ins {
-            none = 0,
-            harp = 1,
-            dbass = 2,
-            bdrum = 3,
-            snare = 4,
-            click = 5,
-            guitar = 6,
-            flute = 7,
-            bell = 8,
-            chime = 9,
-            xyl = 10,
-            ironxyl = 11,
-            cowbell = 12,
-            didgeridoo = 13,
-            bit = 14,
-            banjo = 15,
-            pling = 16
+            harp = 0,
+            dbass = 1,
+            bdrum = 2,
+            snare = 3,
+            click = 4,
+            guitar = 5,
+            flute = 6,
+            bell = 7,
+            chime = 8,
+            xyl = 9,
+            ironxyl = 10,
+            cowbell = 11,
+            didgeridoo = 12,
+            bit = 13,
+            banjo = 14,
+            pling = 15
         }
 
         ins instrumentSelected = ins.harp;
+        sbyte keySelected = 45;
 
         int displayWidth = 16;
         int displayHeight = 7;
+
+        System.Windows.Forms.Timer ClearSoundBuffer = new System.Windows.Forms.Timer();
 
         public Form1() {
             InitializeComponent();
@@ -87,8 +93,6 @@ namespace NoteBlockStudioCS {
                     while (true) {
                         // blocks until the timer interval has elapsed, then resets the event
                         timer.WaitForTrigger();
-
-                        // your high-precision callback here:
                         lock (threadlock) {
                             Timer_Tick(volume);
                         }
@@ -97,12 +101,17 @@ namespace NoteBlockStudioCS {
                     // Thread was aborted—exit cleanly
                 }
             }) {
-                IsBackground = true,    // so it won't keep your app alive if main thread exits
+                IsBackground = true,
                 Name = "HighResTimerWorker"
             };
             worker.Start();
 
             NoteSound.Init();
+
+            ClearSoundBuffer.Tick += (object? sender, EventArgs e) => { NoteSound.Clear(); tsl_SoundsPlaying.Text = $"Sounds Playing: {NoteSound.GetSoundsPlaying()}"; };
+            ClearSoundBuffer.Interval = 250;
+            ClearSoundBuffer.Enabled = true;
+            ClearSoundBuffer.Start();
 
             this.AllowDrop = true;
             this.DragEnter += new DragEventHandler(Form1_DragEnter);
@@ -111,6 +120,45 @@ namespace NoteBlockStudioCS {
             picBox.MouseWheel += ScrollPlayer;
 
             picBox.Invalidate();
+
+            btnHarp.Click += (object? sender, EventArgs e) => { ChangeInstrument("harp"); };
+            btnDBass.Click += (object? sender, EventArgs e) => { ChangeInstrument("dbass"); };
+            btnBDrum.Click += (object? sender, EventArgs e) => { ChangeInstrument("bdrum"); };
+            btnSnare.Click += (object? sender, EventArgs e) => { ChangeInstrument("sdrum"); };
+            btnClick.Click += (object? sender, EventArgs e) => { ChangeInstrument("click"); };
+            btnGuitar.Click += (object? sender, EventArgs e) => { ChangeInstrument("guitar"); };
+            btnFlute.Click += (object? sender, EventArgs e) => { ChangeInstrument("flute"); };
+            btnBell.Click += (object? sender, EventArgs e) => { ChangeInstrument("bell"); };
+            btnChime.Click += (object? sender, EventArgs e) => { ChangeInstrument("icechime"); };
+            btnXylophone.Click += (object? sender, EventArgs e) => { ChangeInstrument("xylobone"); };
+            btnIronXylophone.Click += (object? sender, EventArgs e) => { ChangeInstrument("iron_xylophone"); };
+            btnCowbell.Click += (object? sender, EventArgs e) => { ChangeInstrument("cow_bell"); };
+            btnDidgeridoo.Click += (object? sender, EventArgs e) => { ChangeInstrument("didgeridoo"); };
+            btnBit.Click += (object? sender, EventArgs e) => { ChangeInstrument("bit"); };
+            btnBanjo.Click += (object? sender, EventArgs e) => { ChangeInstrument("banjo"); };
+            btnPling.Click += (object? sender, EventArgs e) => { ChangeInstrument("pling"); };
+        }
+
+        private void ChangeInstrument(string type) {
+            NoteSound.PlaySingle(type, volume: volume);
+            switch (type) {
+                case "harp": instrumentSelected = ins.harp; break;
+                case "dbass": instrumentSelected = ins.dbass; break;
+                case "bdrum": instrumentSelected = ins.bdrum; break;
+                case "sdrum": instrumentSelected = ins.snare; break;
+                case "click": instrumentSelected = ins.click; break;
+                case "guitar": instrumentSelected = ins.guitar; break;
+                case "flute": instrumentSelected = ins.flute; break;
+                case "bell": instrumentSelected = ins.bell; break;
+                case "icechime": instrumentSelected = ins.chime; break;
+                case "xylobone": instrumentSelected = ins.xyl; break;
+                case "iron_xylophone": instrumentSelected = ins.ironxyl; break;
+                case "cow_bell": instrumentSelected = ins.cowbell; break;
+                case "didgeridoo": instrumentSelected = ins.didgeridoo; break;
+                case "bit": instrumentSelected = ins.bit; break;
+                case "banjo": instrumentSelected = ins.banjo; break;
+                case "pling": instrumentSelected = ins.pling; break;
+            }
         }
 
         private void ScrollPlayer(object sender, MouseEventArgs e) {
@@ -144,9 +192,12 @@ namespace NoteBlockStudioCS {
                 // Process the file here
                 loader.LoadFile(filePath);
                 List<NoteBlock> tempList = new List<NoteBlock>(loader.NoteBlocks);
+                totalNotes = tempList.Count;
+                tsl_TotalNotes.Text = $"Total Notes: {totalNotes}";
                 farthestNote = loader.SongLength;
                 Debug.WriteLine(loader.MinutesSpent);
                 hScrollBar.Maximum = farthestNote;
+                SongTempo = loader.SongTempo;
                 num_TPS.Value = (loader.SongTempo / 100);
 
                 notes = new Dictionary<int, Dictionary<int, NoteBlock>>();
@@ -159,6 +210,9 @@ namespace NoteBlockStudioCS {
                         notes[tempList[b].X][tempList[b].Y] = new NoteBlock(tempList[b]);
                     }
                 }
+
+                layers = new List<Layer>(loader.layers);
+
                 picBox.Invalidate();
                 //MessageBox.Show("File loaded\n\nName: " + loader.SongName + "\nAuthor: " + loader.SongAuthor + "\nOriginal Author: " + loader.SongOriginalAuthor + "\nDescription: " + loader.SongDescription);
             }
@@ -184,7 +238,7 @@ namespace NoteBlockStudioCS {
 
         private void Form1_Resize(object sender, EventArgs e) {
             int w = Width - 6;
-            int h = Height - 6;
+            int h = Height - 151;
             displayWidth = (w - 786 + 512) / 32;
             displayHeight = (h - 344 + 224) / 32;
             hScrollBar.Location = new Point(274, 70 + (displayHeight * 32));
@@ -205,20 +259,22 @@ namespace NoteBlockStudioCS {
         private void btnPlay_Click(object sender, EventArgs e) {
             if (playing)
                 timer.Stop();
-            if (notes.Count >= 1) {
+            //if (notes.Count >= 1) {
                 timer.SetPeriod((int)Math.Round(1000f / ((double)num_TPS.Value)));
                 timer.Start();
                 playing = true;
-            }
+            //}
         }
 
         private void Timer_Tick(int volume) {
             NoteSound.Clear();
+            tsl_SoundsPlaying.Text = $"Sounds Playing: {NoteSound.GetSoundsPlaying()}";
             if (notes.ContainsKey(playbackPosition)) {
                 foreach (var note in notes[playbackPosition]) {
-                    NoteSound.AddToPlayQueue(note.Value.Instrument, note.Value.Key, (note.Value.Velocity * (loader.layers[note.Value.Y].Volume / 100f)) * (volume / 100f));
+                    NoteSound.AddToPlayQueue(note.Value.Instrument, note.Value.Key, (note.Value.Velocity * (layers[note.Value.Y].Volume / 100f)) * (volume / 100f));
                 }
                 NoteSound.Play();
+                tsl_SoundsPlaying.Text = $"Sounds Playing: {NoteSound.GetSoundsPlaying()}";
             }
             sw.Restart();
             playbackPosition++;
@@ -262,7 +318,84 @@ namespace NoteBlockStudioCS {
 
         private void picBox_MouseClick(object sender, MouseEventArgs e) {
             int mouseX = e.X / 32;
-            int mouseY = e.Y / 32;
+            int mouseY = (e.Y / 32) - 1;
+            if(mouseY >= 0) {
+                if (e.Button == MouseButtons.Left) {
+                    AddBlock(mouseX, mouseY);
+                    NoteSound.PlaySingle(InsToString(instrumentSelected), keySelected, volume);
+                } else if (e.Button == MouseButtons.Right) {
+                    RemoveBlock(mouseX, mouseY);
+                } else {
+
+                }
+            }
+        }
+
+        private string InsToString(ins i) {
+            switch (i) {
+                case ins.harp: return "harp";
+                case ins.dbass: return "dbass";
+                case ins.bdrum: return "bdrum";
+                case ins.snare: return "sdrum";
+                case ins.click: return "click";
+                case ins.guitar: return "guitar";
+                case ins.flute: return "flute";
+                case ins.bell: return "bell";
+                case ins.chime: return "icechime";
+                case ins.xyl: return "xylobone";
+                case ins.ironxyl: return "iron_xylophone";
+                case ins.cowbell: return "cow_bell";
+                case ins.didgeridoo: return "didgeridoo";
+                case ins.bit: return "bit";
+                case ins.banjo: return "banjo";
+                case ins.pling: return "pling";
+            }
+            return "";
+        }
+
+        private void AddBlock(int x, int y) {
+            AddBlock(x, y, new NoteBlock(x, y, (sbyte)instrumentSelected, keySelected, 100, 0, 0));
+        }
+
+        private void AddBlock(int x, int y, NoteBlock nb) {
+            if (!notes.ContainsKey(x))
+                notes[x] = new Dictionary<int, NoteBlock>();
+            if (!notes[x].ContainsKey(y)) {
+                totalNotes++;
+            }
+            notes[x][y] = nb;
+
+            if(y >= layers.Count) {
+                for (int i = layers.Count; i <= y; i++) {
+                    layers.Add(new Layer());
+                }
+            }
+
+            tsl_TotalNotes.Text = $"Total Notes: {totalNotes}";
+            if(x >= farthestNote) {
+                farthestNote = x;
+            }
+
+            Debug.WriteLine($"{y}, {layers.Count}");
+
+            picBox.Invalidate(new Rectangle((x - offset) * 32, (y * 32) + 32, 32, 32));
+        }
+
+        private void RemoveBlock(int x, int y) {
+            if (notes.ContainsKey(x) && notes[x].ContainsKey(y)) {
+                notes[x].Remove(y);
+                totalNotes--;
+                if (notes[x].Count == 0) {
+                    notes.Remove(x);
+                    if(totalNotes == 0) {
+                        farthestNote = 0;
+                    } else {
+                        farthestNote = notes.OrderByDescending(x => x.Key).First().Key;
+                    }
+                }
+                tsl_TotalNotes.Text = $"Total Notes: {totalNotes}";
+            }
+            picBox.Invalidate(new Rectangle((x - offset) * 32, (y * 32) + 32, 32, 32));
         }
 
         private void hScrollBar_Scroll(object sender, ScrollEventArgs e) {
@@ -274,13 +407,19 @@ namespace NoteBlockStudioCS {
         }
 
         private void btnStop_Click(object sender, EventArgs e) {
-            if (playing)
+            if (playing) {
                 timer.Stop();
-            playing = false;
+                playing = false;
+            } else {
+                playbackPosition = 0;
+                offset = 0;
+                picBox.Invalidate();
+            }
+            tsl_SoundsPlaying.Text = $"Sounds Playing: {NoteSound.GetSoundsPlaying()}";
         }
 
         private void num_TPS_ValueChanged(object sender, EventArgs e) {
-            timer.SetPeriod((int)Math.Round(1000f / (loader.SongTempo / 100f)));
+            timer.SetPeriod((int)Math.Round(1000f / (SongTempo / 100f)));
         }
     }
 }

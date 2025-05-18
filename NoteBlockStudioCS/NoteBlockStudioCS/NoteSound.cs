@@ -73,6 +73,10 @@ namespace NoteBlockStudioCS {
 
         }
 
+        public static int GetSoundsPlaying() {
+            return sources.Count;
+        }
+
         /// <summary>
         /// Initialize the static class
         /// </summary>
@@ -89,7 +93,6 @@ namespace NoteBlockStudioCS {
                     sources.RemoveAt(i);
                 }
             }
-            Debug.WriteLine($"Sounds playing: {sources.Count}");
         }
 
         public static void Play() {
@@ -105,6 +108,18 @@ namespace NoteBlockStudioCS {
             sources[index].SubmitSourceBuffer(Buffers[type]);
             sources[index].SetFrequencyRatio(freqRatio, 0);
             sources[index].Start(1);
+            sw.Stop();
+        }
+
+        public static void PlaySingle(string type, float speed = 45.0f, float volume = 100.0f) {
+            Stopwatch sw = Stopwatch.StartNew();
+            float freqRatio = (float)Math.Pow(2, (speed - 45f) / 12);
+            sources.Add(xaudio.CreateSourceVoice(sounds[type].WaveFormat, maxFrequencyRatio: 4f));
+            int index = sources.Count - 1;
+            sources[index].SetVolume(volume / 100f);
+            sources[index].SubmitSourceBuffer(Buffers[type]);
+            sources[index].SetFrequencyRatio(freqRatio, 0);
+            sources[index].Start();
             sw.Stop();
         }
 

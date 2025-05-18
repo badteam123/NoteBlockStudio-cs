@@ -63,10 +63,17 @@
             label4 = new Label();
             lblVolume = new Label();
             openFileDialog1 = new OpenFileDialog();
+            pictureBox1 = new PictureBox();
+            sts_Status = new StatusStrip();
+            tsl_Instrument = new ToolStripStatusLabel();
+            tsl_SoundsPlaying = new ToolStripStatusLabel();
+            tsl_TotalNotes = new ToolStripStatusLabel();
             menu.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)num_TPS).BeginInit();
             ((System.ComponentModel.ISupportInitialize)picBox).BeginInit();
             ((System.ComponentModel.ISupportInitialize)volumeBar).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)pictureBox1).BeginInit();
+            sts_Status.SuspendLayout();
             SuspendLayout();
             // 
             // menu
@@ -528,12 +535,61 @@
             // 
             openFileDialog1.FileName = "openFileDialog1";
             // 
+            // pictureBox1
+            // 
+            pictureBox1.Anchor = AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            pictureBox1.BackColor = Color.FromArgb(40, 40, 40);
+            pictureBox1.BackgroundImageLayout = ImageLayout.None;
+            pictureBox1.BorderStyle = BorderStyle.FixedSingle;
+            pictureBox1.Location = new Point(13, 343);
+            pictureBox1.Margin = new Padding(4, 3, 4, 3);
+            pictureBox1.Name = "pictureBox1";
+            pictureBox1.Size = new Size(756, 122);
+            pictureBox1.TabIndex = 34;
+            pictureBox1.TabStop = false;
+            // 
+            // sts_Status
+            // 
+            sts_Status.BackColor = Color.FromArgb(20, 20, 20);
+            sts_Status.Items.AddRange(new ToolStripItem[] { tsl_Instrument, tsl_SoundsPlaying, tsl_TotalNotes });
+            sts_Status.Location = new Point(0, 466);
+            sts_Status.Name = "sts_Status";
+            sts_Status.Size = new Size(782, 22);
+            sts_Status.TabIndex = 35;
+            sts_Status.Text = "statusStrip1";
+            // 
+            // tsl_Instrument
+            // 
+            tsl_Instrument.ForeColor = Color.White;
+            tsl_Instrument.Name = "tsl_Instrument";
+            tsl_Instrument.Size = new Size(245, 17);
+            tsl_Instrument.Spring = true;
+            tsl_Instrument.Text = "Instrument: Harp";
+            // 
+            // tsl_SoundsPlaying
+            // 
+            tsl_SoundsPlaying.ForeColor = Color.White;
+            tsl_SoundsPlaying.Name = "tsl_SoundsPlaying";
+            tsl_SoundsPlaying.Size = new Size(245, 17);
+            tsl_SoundsPlaying.Spring = true;
+            tsl_SoundsPlaying.Text = "Sounds Playing: 0";
+            // 
+            // tsl_TotalNotes
+            // 
+            tsl_TotalNotes.ForeColor = Color.White;
+            tsl_TotalNotes.Name = "tsl_TotalNotes";
+            tsl_TotalNotes.Size = new Size(245, 17);
+            tsl_TotalNotes.Spring = true;
+            tsl_TotalNotes.Text = "Total Notes: 0";
+            // 
             // Form1
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = Color.FromArgb(20, 20, 20);
-            ClientSize = new Size(782, 349);
+            ClientSize = new Size(782, 488);
+            Controls.Add(sts_Status);
+            Controls.Add(pictureBox1);
             Controls.Add(lblVolume);
             Controls.Add(label4);
             Controls.Add(volumeBar);
@@ -570,7 +626,7 @@
             Icon = (Icon)resources.GetObject("$this.Icon");
             MainMenuStrip = menu;
             Margin = new Padding(4, 3, 4, 3);
-            MinimumSize = new Size(798, 388);
+            MinimumSize = new Size(798, 527);
             Name = "Form1";
             Text = "Note Block Studio Remake";
             Resize += Form1_Resize;
@@ -579,6 +635,9 @@
             ((System.ComponentModel.ISupportInitialize)num_TPS).EndInit();
             ((System.ComponentModel.ISupportInitialize)picBox).EndInit();
             ((System.ComponentModel.ISupportInitialize)volumeBar).EndInit();
+            ((System.ComponentModel.ISupportInitialize)pictureBox1).EndInit();
+            sts_Status.ResumeLayout(false);
+            sts_Status.PerformLayout();
             ResumeLayout(false);
             PerformLayout();
         }
@@ -625,6 +684,11 @@
         private System.Windows.Forms.Label lblVolume;
         private System.Windows.Forms.OpenFileDialog openFileDialog1;
         private NumericUpDown num_TPS;
+        private PictureBox pictureBox1;
+        private StatusStrip sts_Status;
+        private ToolStripStatusLabel tsl_Instrument;
+        private ToolStripStatusLabel tsl_SoundsPlaying;
+        private ToolStripStatusLabel tsl_TotalNotes;
     }
 }
 
