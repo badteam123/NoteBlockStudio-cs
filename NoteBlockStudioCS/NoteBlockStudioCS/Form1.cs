@@ -22,22 +22,46 @@ namespace NoteBlockStudioCS {
         SolidBrush brushLightGray = new SolidBrush(Color.FromArgb(200, 200, 200));
         SolidBrush brushGray = new SolidBrush(Color.FromArgb(60, 60, 60));
         SolidBrush brushSelected = new SolidBrush(Color.FromArgb(50, 200, 200, 200));
+        SolidBrush brushKeySelected = new SolidBrush(Color.FromArgb(100, 100, 100, 200));
 
         StringFormat centered = new StringFormat();
 
-        WaveOutEvent waveOut = new WaveOutEvent();
-        MixingSampleProvider mixer = new MixingSampleProvider(WaveFormat.CreateIeeeFloatWaveFormat(44100, 1)) {
-            ReadFully = true
-        };
+        delegate void TickHandler();
 
         List<string> files = new List<string> { "stuff/sounds/harp.wav" };
         List<ISampleProvider> sources = new List<ISampleProvider>();
 
-        int offset = 0;
-        int farthestNote = 0;
+        int farthestNoteX = 0;
+        int farthestNoteY = 0;
         int totalNotes = 0;
 
-        int playbackPosition = 0;
+        private int _playbackPosition;
+        int playbackPosition {
+            get { return _playbackPosition; }
+            set {
+                _playbackPosition = value;
+                tbx_Position.Text = $"{(_playbackPosition / 16) + 1}, {((_playbackPosition / 4) % 4) + 1}, {(_playbackPosition % 4) + 1}";
+                // SongTempo = ticks per second
+                double secPerTick = 100.0 / SongTempo;
+                double secIntoSong = playbackPosition * secPerTick;
+
+                // total whole seconds elapsed
+                int totalSeconds = (int)Math.Floor(secIntoSong);
+                // hours component
+                int hours = totalSeconds / 3600;
+                // minutes component
+                int minutes = (totalSeconds / 60) % 60;
+                // seconds component (0–59)
+                int seconds = totalSeconds % 60;
+                // fractional part of a second, turned into two-digit hundredths
+                int hundredths = (int)((secIntoSong - totalSeconds) * 100);
+
+                // format as MM:SS.hh
+                lbl_SongCurrentTime.Text = $"{hours:00}:{minutes:00}:{seconds:00}.{hundredths:00}";
+
+            }
+        }
+
         int volume;
         object threadlock = new object();
         short SongTempo = 1000;
@@ -77,8 +101,13 @@ namespace NoteBlockStudioCS {
 
         System.Windows.Forms.Timer ClearSoundBuffer = new System.Windows.Forms.Timer();
 
+        private readonly SynchronizationContext _uiContext;
+        private readonly Action _postTick;
+
         public Form1() {
             InitializeComponent();
+            _uiContext = SynchronizationContext.Current!;
+            _postTick = () => _uiContext.Post(_ => OnTimerTick(), null);
             centered.Alignment = StringAlignment.Center;
             centered.LineAlignment = StringAlignment.Center;
 
@@ -88,25 +117,9 @@ namespace NoteBlockStudioCS {
             }
             volume = volumeBar.Value;
 
-            var worker = new Thread(() => {
-                try {
-                    while (true) {
-                        // blocks until the timer interval has elapsed, then resets the event
-                        timer.WaitForTrigger();
-                        lock (threadlock) {
-                            Timer_Tick(volume);
-                        }
-                    }
-                } catch (ThreadAbortException) {
-                    // Thread was aborted—exit cleanly
-                }
-            }) {
-                IsBackground = true,
-                Name = "HighResTimerWorker"
-            };
-            worker.Start();
-
             NoteSound.Init();
+
+            StartWorker();
 
             ClearSoundBuffer.Tick += (object? sender, EventArgs e) => { NoteSound.Clear(); tsl_SoundsPlaying.Text = $"Sounds Playing: {NoteSound.GetSoundsPlaying()}"; };
             ClearSoundBuffer.Interval = 250;
@@ -139,6 +152,53 @@ namespace NoteBlockStudioCS {
             btnPling.Click += (object? sender, EventArgs e) => { ChangeInstrument("pling"); };
         }
 
+        private void StartWorker() {
+            var worker = new Thread(() =>
+            {
+                try {
+                    while (true) {
+                        timer.WaitForTrigger();
+                        lock (threadlock) {
+                            // Marshal the tick call to the main thread
+                            _postTick();
+                        }
+                    }
+                } catch (ThreadAbortException) {
+                    // clean exit
+                }
+            }) {
+                IsBackground = true,
+                Name = "HighResTimerWorker"
+            };
+            worker.Start();
+        }
+
+        private void OnTimerTick() {
+            NoteSound.Clear();
+            tsl_SoundsPlaying.Text = $"Sounds Playing: {NoteSound.GetSoundsPlaying()}";
+            if (notes.ContainsKey(playbackPosition)) {
+                foreach (var note in notes[playbackPosition]) {
+                    NoteSound.AddToPlayQueue(note.Value.Instrument, note.Value.Key, (note.Value.Velocity * (layers[note.Value.Y].Volume / 100f)) * (volume / 100f));
+                }
+                NoteSound.Play();
+                tsl_SoundsPlaying.Text = $"Sounds Playing: {NoteSound.GetSoundsPlaying()}";
+            }
+            sw.Stop();
+            tsl_LastTickMS.Text = $"Last Tick: {sw.ElapsedMilliseconds.ToString()}ms";
+            sw.Restart();
+            playbackPosition++;
+            if (playbackPosition >= farthestNoteX + displayWidth - 3 && playing) {
+                timer.Stop();
+                playing = false;
+            }
+            if (playbackPosition > hScrollBar.Value + displayWidth) {
+                hScrollBar.Value = Math.Min(playbackPosition, farthestNoteX);
+                picBox.Invalidate();
+            } else {
+                picBox.Invalidate(new Rectangle((playbackPosition - hScrollBar.Value - 1) * 32, 32, 64, (displayHeight * 32)));
+            }
+        }
+
         private void ChangeInstrument(string type) {
             NoteSound.PlaySingle(type, volume: volume);
             switch (type) {
@@ -162,7 +222,7 @@ namespace NoteBlockStudioCS {
         }
 
         private void ScrollPlayer(object sender, MouseEventArgs e) {
-            //offset = Math.Max(offset - Math.Sign(e.Delta), 0);
+            //hScrollBar.Value = Math.Max(hScrollBar.Value - Math.Sign(e.Delta), 0);
             //NoteSound.Play("harp", ((float)volumeBar.Value) / 100f);
             playbackPosition += 20 * Math.Sign(e.Delta);
             playbackPosition = Math.Max(playbackPosition, 0);
@@ -194,9 +254,9 @@ namespace NoteBlockStudioCS {
                 List<NoteBlock> tempList = new List<NoteBlock>(loader.NoteBlocks);
                 totalNotes = tempList.Count;
                 tsl_TotalNotes.Text = $"Total Notes: {totalNotes}";
-                farthestNote = loader.SongLength;
+                farthestNoteX = loader.SongLength;
                 Debug.WriteLine(loader.MinutesSpent);
-                hScrollBar.Maximum = farthestNote;
+                hScrollBar.Maximum = farthestNoteX;
                 SongTempo = loader.SongTempo;
                 num_TPS.Value = (loader.SongTempo / 100);
 
@@ -240,6 +300,7 @@ namespace NoteBlockStudioCS {
             int w = Width - 6;
             int h = Height - 151;
             displayWidth = (w - 786 + 512) / 32;
+            Debug.WriteLine(displayWidth);
             displayHeight = (h - 344 + 224) / 32;
             hScrollBar.Location = new Point(274, 70 + (displayHeight * 32));
             hScrollBar.Size = new Size((displayWidth * 32) - 32, hScrollBar.Size.Height);
@@ -247,79 +308,65 @@ namespace NoteBlockStudioCS {
             vScrollBar.Size = new Size(vScrollBar.Size.Width, displayHeight * 32);
             picBox.Width = (displayWidth * 32) - 32;
             picBox.Height = (displayHeight * 32);
+
+            // Piano
+            pbx_Piano.Invalidate();
         }
 
         private void volumeBar_Scroll(object sender, EventArgs e) {
             lblVolume.Text = volumeBar.Value.ToString() + "%";
-            lock (threadlock) {
-                volume = volumeBar.Value;
-            }
+            volume = volumeBar.Value;
         }
 
         private void btnPlay_Click(object sender, EventArgs e) {
             if (playing)
                 timer.Stop();
             //if (notes.Count >= 1) {
-                timer.SetPeriod((int)Math.Round(1000f / ((double)num_TPS.Value)));
-                timer.Start();
-                playing = true;
+            timer.SetPeriod((int)Math.Round(1000f / ((double)num_TPS.Value)));
+            timer.Start();
+            playing = true;
             //}
-        }
-
-        private void Timer_Tick(int volume) {
-            NoteSound.Clear();
-            tsl_SoundsPlaying.Text = $"Sounds Playing: {NoteSound.GetSoundsPlaying()}";
-            if (notes.ContainsKey(playbackPosition)) {
-                foreach (var note in notes[playbackPosition]) {
-                    NoteSound.AddToPlayQueue(note.Value.Instrument, note.Value.Key, (note.Value.Velocity * (layers[note.Value.Y].Volume / 100f)) * (volume / 100f));
-                }
-                NoteSound.Play();
-                tsl_SoundsPlaying.Text = $"Sounds Playing: {NoteSound.GetSoundsPlaying()}";
-            }
-            sw.Restart();
-            playbackPosition++;
-            if (playbackPosition > offset + displayWidth) {
-                offset = playbackPosition;
-                picBox.Invalidate();
-            } else {
-                picBox.Invalidate(new Rectangle((playbackPosition - offset - 1) * 32, 32, 64, (displayHeight * 32)));
-            }
         }
 
         private void picBox_Paint(object sender, PaintEventArgs e) {
             Graphics g = e.Graphics;
             //picBox.Invalidate();
 
+            // Top stuff
             g.FillRectangle(brushGray, 0, 0, picBox.Width, 32);
 
-            g.DrawLine(penLightGray, 0, 32, picBox.Width, 32);
-            g.DrawLine(penLightGray, 0, 16, picBox.Width, 16);
-
-            for (int i = 0; i < displayWidth; i++) {
+            for (int i = hScrollBar.Value; i < hScrollBar.Value + displayWidth; i++) {
                 if (i % 4 == 0) {
-                    g.DrawLine(penGray1, i * 32, 32, i * 32, picBox.Height);
-                    g.DrawString(i.ToString(), DefaultFont, brushLightGray, i * 32, 24, centered);
+                    g.DrawLine(penGray1, (i - hScrollBar.Value) * 32, 32, (i - hScrollBar.Value) * 32, picBox.Height);
+                    g.DrawString(i.ToString(), DefaultFont, brushLightGray, (i - hScrollBar.Value) * 32, 24, centered);
                 } else {
-                    g.DrawLine(penGray2, i * 32, 32, i * 32, picBox.Height);
+                    g.DrawLine(penGray2, (i - hScrollBar.Value) * 32, 32, (i - hScrollBar.Value) * 32, picBox.Height);
                 }
             }
 
             SolidBrush white = new SolidBrush(Color.FromArgb(255, 255, 255));
             foreach (int x in notes.Keys) {
                 foreach (int y in notes[x].Keys) {
-                    g.FillRectangle(NoteSound.Brushes[notes[x][y].Instrument], (notes[x][y].X - offset) * 32, (notes[x][y].Y + 1) * 32, 32, 32);
-                    g.DrawString((notes[x][y].Key - 33).ToString(), DefaultFont, white, ((notes[x][y].X - offset) * 32) + 16, ((notes[x][y].Y + 1) * 32) + 16);
+                    if(y - vScrollBar.Value >= 0) {
+                        g.FillRectangle(NoteSound.Brushes[notes[x][y].Instrument], (notes[x][y].X - hScrollBar.Value) * 32, (notes[x][y].Y - vScrollBar.Value + 1) * 32, 32, 32);
+                        g.DrawString((notes[x][y].Key - 33).ToString(), DefaultFont, white, ((notes[x][y].X - hScrollBar.Value) * 32) + 16, ((notes[x][y].Y - vScrollBar.Value + 1) * 32) + 16, centered);
+                    }
                 }
             }
 
-            g.FillRectangle(brushSelected, (playbackPosition - offset) * 32, 32, 32, (displayHeight * 32));
+            // Playback column highlight
+            g.FillRectangle(brushSelected, (playbackPosition - hScrollBar.Value) * 32, 32, 32, (displayHeight * 32));
+
+            // Lines at top
+            g.DrawLine(penLightGray, 0, 32, picBox.Width, 32);
+            g.DrawLine(penLightGray, 0, 16, picBox.Width, 16);
 
         }
 
         private void picBox_MouseClick(object sender, MouseEventArgs e) {
-            int mouseX = e.X / 32;
-            int mouseY = (e.Y / 32) - 1;
-            if(mouseY >= 0) {
+            int mouseX = (e.X / 32) + hScrollBar.Value;
+            int mouseY = ((e.Y / 32) - 1) + vScrollBar.Value;
+            if (mouseY >= 0) {
                 if (e.Button == MouseButtons.Left) {
                     AddBlock(mouseX, mouseY);
                     NoteSound.PlaySingle(InsToString(instrumentSelected), keySelected, volume);
@@ -327,6 +374,17 @@ namespace NoteBlockStudioCS {
                     RemoveBlock(mouseX, mouseY);
                 } else {
 
+                }
+            } else {
+                if (!playing) {
+                    playbackPosition = mouseX;
+                    picBox.Invalidate();
+                    if (notes.ContainsKey(mouseX)) {
+                        foreach(var i in notes[mouseX]) {
+                            NoteSound.AddToPlayQueue(i.Value.Instrument, i.Value.Key, (i.Value.Velocity * (layers[i.Key].Volume / 100f)) * (volume / 100f));
+                        }
+                        NoteSound.Play();
+                    }
                 }
             }
         }
@@ -365,20 +423,25 @@ namespace NoteBlockStudioCS {
             }
             notes[x][y] = nb;
 
-            if(y >= layers.Count) {
+            if (y >= layers.Count) {
                 for (int i = layers.Count; i <= y; i++) {
                     layers.Add(new Layer());
                 }
             }
 
             tsl_TotalNotes.Text = $"Total Notes: {totalNotes}";
-            if(x >= farthestNote) {
-                farthestNote = x;
+            if (x >= farthestNoteX) {
+                farthestNoteX = x;
             }
 
-            Debug.WriteLine($"{y}, {layers.Count}");
+            if (y >= farthestNoteY) {
+                farthestNoteY = y;
+            }
 
-            picBox.Invalidate(new Rectangle((x - offset) * 32, (y * 32) + 32, 32, 32));
+            hScrollBar.Maximum = farthestNoteX;
+            vScrollBar.Maximum = farthestNoteY;
+
+            picBox.Invalidate(new Rectangle((x - hScrollBar.Value) * 32, ((y - vScrollBar.Value) * 32) + 32, 32, 32));
         }
 
         private void RemoveBlock(int x, int y) {
@@ -387,19 +450,28 @@ namespace NoteBlockStudioCS {
                 totalNotes--;
                 if (notes[x].Count == 0) {
                     notes.Remove(x);
-                    if(totalNotes == 0) {
-                        farthestNote = 0;
+                    if (totalNotes == 0) {
+                        farthestNoteX = 0;
                     } else {
-                        farthestNote = notes.OrderByDescending(x => x.Key).First().Key;
+                        farthestNoteX = notes.OrderByDescending(i => i.Key).First().Key;
                     }
                 }
+                if (y == farthestNoteY) {
+                    if (totalNotes == 0) {
+                        farthestNoteY = 0;
+                    } else {
+                        farthestNoteY = notes.Max(outer => outer.Value.Keys.Max());
+                    }
+                }
+                hScrollBar.Maximum = farthestNoteX;
+                vScrollBar.Maximum = farthestNoteY;
                 tsl_TotalNotes.Text = $"Total Notes: {totalNotes}";
             }
-            picBox.Invalidate(new Rectangle((x - offset) * 32, (y * 32) + 32, 32, 32));
+            picBox.Invalidate(new Rectangle((x - hScrollBar.Value) * 32, ((y - vScrollBar.Value) * 32) + 32, 32, 32));
         }
 
-        private void hScrollBar_Scroll(object sender, ScrollEventArgs e) {
-            offset = hScrollBar.Value;
+        private void ScrollBar_Scroll(object sender, ScrollEventArgs e) {
+            picBox.Invalidate();
         }
 
         private void picBox_LoadCompleted(object sender, System.ComponentModel.AsyncCompletedEventArgs e) {
@@ -412,14 +484,105 @@ namespace NoteBlockStudioCS {
                 playing = false;
             } else {
                 playbackPosition = 0;
-                offset = 0;
+                hScrollBar.Value = 0;
                 picBox.Invalidate();
             }
             tsl_SoundsPlaying.Text = $"Sounds Playing: {NoteSound.GetSoundsPlaying()}";
         }
 
         private void num_TPS_ValueChanged(object sender, EventArgs e) {
+            SongTempo = (short)num_TPS.Value;
+            SongTempo *= 100;
             timer.SetPeriod((int)Math.Round(1000f / (SongTempo / 100f)));
+        }
+
+        private void pbx_Piano_MouseDown(object sender, MouseEventArgs e) {
+
+            int centerKey = 45;          // your “always centered” key
+            int keyWidth = 32;          // width of each key in pixels
+            int W = pbx_Piano.ClientSize.Width;
+
+            // how many on each side
+            int sideCount = (W / keyWidth) / 2 + 1;
+            int totalKeys = sideCount * 2 + 1;
+            int usedWidth = totalKeys * keyWidth;
+            int insetX = (W - usedWidth) / 2;
+
+            // logical index of leftmost drawn key
+            int leftKey = centerKey - sideCount;
+
+            // mouse X relative to the keyed area
+            int localX = e.X - insetX;
+
+            // if you clicked outside the drawn keys, ignore
+            if (localX < 0 || localX >= usedWidth)
+                return;  // clicked in the margin
+
+            // integer‐divide to find which key slot
+            int slot = localX / keyWidth;       // 0..totalKeys-1
+            int clickedKey = leftKey + slot;    // the actual key number
+
+            if (clickedKey != keySelected) {
+                keySelected = (sbyte)clickedKey;
+                pbx_Piano.Invalidate();
+            }
+            NoteSound.PlaySingle(InsToString(instrumentSelected), keySelected, volume);
+
+        }
+
+        private void pbx_Piano_Paint(object sender, PaintEventArgs e) {
+
+            base.OnPaint(e);
+            Graphics g = e.Graphics;
+
+            string[] keyNames = { "A", "A#", "B", "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#" };
+            //string[] keyNames = { "A", "B", "C", "D", "E", "F", "G" };
+
+            // 1. Configuration
+            int centerKey = 45;           // center index
+            int keyWidth = 32;            // width of each key in pixels
+            int W = pbx_Piano.ClientSize.Width;
+            int H = pbx_Piano.ClientSize.Height;
+
+            // 2. How many keys per side?
+            //    Always draw an odd count: 2*side + 1
+            int sideCount = (W / keyWidth) / 2 + 1;
+
+            // 3. Total number of keys we’ll draw
+            int totalKeys = sideCount * 2 + 1;
+
+            // 4. Compute inset so the block of keys is centered
+            int usedWidth = totalKeys * keyWidth;
+            int insetX = (W - usedWidth) / 2;
+
+            // 5. Loop from leftmost logical key to rightmost
+            int leftKey = centerKey - sideCount;
+            using var pen = new Pen(Color.Gray);
+
+            int skipped = 0;
+            for (int i = 0; i < totalKeys; i++) {
+                int keyIndex = leftKey + i;
+                int x = insetX + i * keyWidth;
+
+                if (keyIndex % 12 == 1 || keyIndex % 12 == 4 || keyIndex % 12 == 6 || keyIndex % 12 == 9 || keyIndex % 12 == 11) {
+                    g.FillRectangle(Brushes.Black, x, 0, keyWidth, H);
+                }
+
+                // Highlight the selected key
+                if (keyIndex == keySelected)
+                    g.FillRectangle(brushKeySelected, x, 0, keyWidth, H);
+
+                // Draw the vertical line (key boundary)
+                g.DrawLine(pen, x, 0, x, H);
+
+                // Draw the key number beneath it
+                g.DrawString(keyIndex.ToString(), this.Font, Brushes.White, new RectangleF(x, H - 20, keyWidth, 20), centered);
+                g.DrawString(keyNames[((keyIndex%12)+12) % 12], this.Font, Brushes.White, new RectangleF(x, H - 40, keyWidth, 20), centered);
+            }
+
+            // Final right boundary line
+            g.DrawLine(pen, insetX + totalKeys * keyWidth, 0, insetX + totalKeys * keyWidth, H);
+
         }
     }
 }

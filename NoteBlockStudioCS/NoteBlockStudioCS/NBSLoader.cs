@@ -121,6 +121,12 @@ namespace NoteBlockStudioCS {
                 }
 
             }
+
+            /*
+             * Version: {Version}\nVanillaInstrumentCount: {VanillaInstrumentCount}\nSongLength: {SongLength}\nLayerCount: {LayerCount}\nSongName: {SongName}\nSongAuthor: {SongAuthor}\nSongOriginalAuthor: {SongOriginalAuthor}\nSongDescription: {SongDescription}\nSongTempo: {SongTempo}\nAutoSaving: {AutoSaving}\nAutoSavingDuration: {AutoSavingDuration}\nTimeSignature: {TimeSignature}\nMinutesSpent: {MinutesSpent}\nLeftClicks: {LeftClicks}\nRightClicks: {RightClicks}\nNoteBlocksAdded: {NoteBlocksAdded}\nNoteBlocksRemoved: {NoteBlocksRemoved}\nMidiSchematicFileName: {MidiSchematicFileName}\nLooping: {Looping}\nMaxLoopCount: {MaxLoopCount}\nLoopStartTick: {LoopStartTick}\n
+            */
+            MessageBox.Show($"Version: {Version}\nVanillaInstrumentCount: {VanillaInstrumentCount}\nSongLength: {SongLength}\nLayerCount: {LayerCount}\nSongName: {SongName}\nSongAuthor: {SongAuthor}\nSongOriginalAuthor: {SongOriginalAuthor}\nSongDescription: {SongDescription}\nSongTempo: {SongTempo}\nAutoSaving: {AutoSaving}\nAutoSavingDuration: {AutoSavingDuration}\nTimeSignature: {TimeSignature}\nMinutesSpent: {MinutesSpent}\nLeftClicks: {LeftClicks}\nRightClicks: {RightClicks}\nNoteBlocksAdded: {NoteBlocksAdded}\nNoteBlocksRemoved: {NoteBlocksRemoved}\nMidiSchematicFileName: {MidiSchematicFileName}\nLooping: {Looping}\nMaxLoopCount: {MaxLoopCount}\nLoopStartTick: {LoopStartTick}\n");
+
         }
     }
 

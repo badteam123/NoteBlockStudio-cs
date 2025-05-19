@@ -35,11 +35,11 @@
             btnStop = new Button();
             btnReverse = new Button();
             btnForward = new Button();
-            label1 = new Label();
-            label2 = new Label();
+            lbl_SongCurrentTime = new Label();
+            lbl_SongTotalTime = new Label();
             num_TPS = new NumericUpDown();
             label3 = new Label();
-            textBox1 = new TextBox();
+            tbx_Position = new TextBox();
             picBox = new PictureBox();
             vScrollBar = new VScrollBar();
             hScrollBar = new HScrollBar();
@@ -63,17 +63,20 @@
             label4 = new Label();
             lblVolume = new Label();
             openFileDialog1 = new OpenFileDialog();
-            pictureBox1 = new PictureBox();
+            pbx_Piano = new PictureBox();
             sts_Status = new StatusStrip();
             tsl_Instrument = new ToolStripStatusLabel();
             tsl_SoundsPlaying = new ToolStripStatusLabel();
             tsl_TotalNotes = new ToolStripStatusLabel();
+            tsl_LastTickMS = new ToolStripStatusLabel();
+            pbx_Layers = new PictureBox();
             menu.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)num_TPS).BeginInit();
             ((System.ComponentModel.ISupportInitialize)picBox).BeginInit();
             ((System.ComponentModel.ISupportInitialize)volumeBar).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)pictureBox1).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)pbx_Piano).BeginInit();
             sts_Status.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)pbx_Layers).BeginInit();
             SuspendLayout();
             // 
             // menu
@@ -189,27 +192,27 @@
             btnForward.TabIndex = 4;
             btnForward.UseVisualStyleBackColor = true;
             // 
-            // label1
+            // lbl_SongCurrentTime
             // 
-            label1.Font = new Font("Calibri", 12F, FontStyle.Regular, GraphicsUnit.Point, 0);
-            label1.ForeColor = Color.White;
-            label1.Location = new Point(7, 61);
-            label1.Margin = new Padding(4, 0, 4, 0);
-            label1.Name = "label1";
-            label1.Size = new Size(113, 23);
-            label1.TabIndex = 5;
-            label1.Text = "00:00:00.000";
+            lbl_SongCurrentTime.Font = new Font("Calibri", 12F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            lbl_SongCurrentTime.ForeColor = Color.White;
+            lbl_SongCurrentTime.Location = new Point(7, 61);
+            lbl_SongCurrentTime.Margin = new Padding(4, 0, 4, 0);
+            lbl_SongCurrentTime.Name = "lbl_SongCurrentTime";
+            lbl_SongCurrentTime.Size = new Size(113, 23);
+            lbl_SongCurrentTime.TabIndex = 5;
+            lbl_SongCurrentTime.Text = "00:00:00.000";
             // 
-            // label2
+            // lbl_SongTotalTime
             // 
-            label2.Font = new Font("Calibri", 8.25F, FontStyle.Regular, GraphicsUnit.Point, 0);
-            label2.ForeColor = Color.White;
-            label2.Location = new Point(24, 82);
-            label2.Margin = new Padding(4, 0, 4, 0);
-            label2.Name = "label2";
-            label2.Size = new Size(89, 15);
-            label2.TabIndex = 6;
-            label2.Text = "/ 00:00:00.000";
+            lbl_SongTotalTime.Font = new Font("Calibri", 8.25F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            lbl_SongTotalTime.ForeColor = Color.White;
+            lbl_SongTotalTime.Location = new Point(24, 82);
+            lbl_SongTotalTime.Margin = new Padding(4, 0, 4, 0);
+            lbl_SongTotalTime.Name = "lbl_SongTotalTime";
+            lbl_SongTotalTime.Size = new Size(89, 15);
+            lbl_SongTotalTime.TabIndex = 6;
+            lbl_SongTotalTime.Text = "/ 00:00:00.000";
             // 
             // num_TPS
             // 
@@ -241,18 +244,19 @@
             label3.TabIndex = 8;
             label3.Text = "t/s";
             // 
-            // textBox1
+            // tbx_Position
             // 
-            textBox1.BackColor = Color.FromArgb(20, 20, 20);
-            textBox1.BorderStyle = BorderStyle.FixedSingle;
-            textBox1.ForeColor = Color.White;
-            textBox1.Location = new Point(212, 67);
-            textBox1.Margin = new Padding(4, 3, 4, 3);
-            textBox1.Name = "textBox1";
-            textBox1.Size = new Size(54, 23);
-            textBox1.TabIndex = 9;
-            textBox1.Text = "1, 1, 1";
-            textBox1.TextAlign = HorizontalAlignment.Right;
+            tbx_Position.BackColor = Color.FromArgb(20, 20, 20);
+            tbx_Position.BorderStyle = BorderStyle.FixedSingle;
+            tbx_Position.ForeColor = Color.White;
+            tbx_Position.Location = new Point(212, 67);
+            tbx_Position.Margin = new Padding(4, 3, 4, 3);
+            tbx_Position.Name = "tbx_Position";
+            tbx_Position.ReadOnly = true;
+            tbx_Position.Size = new Size(54, 23);
+            tbx_Position.TabIndex = 9;
+            tbx_Position.Text = "1, 1, 1";
+            tbx_Position.TextAlign = HorizontalAlignment.Right;
             // 
             // picBox
             // 
@@ -267,14 +271,17 @@
             picBox.TabStop = false;
             picBox.LoadCompleted += picBox_LoadCompleted;
             picBox.Paint += picBox_Paint;
-            picBox.MouseClick += picBox_MouseClick;
+            picBox.MouseDown += picBox_MouseClick;
             // 
             // vScrollBar
             // 
+            vScrollBar.LargeChange = 1;
             vScrollBar.Location = new Point(758, 67);
+            vScrollBar.Maximum = 0;
             vScrollBar.Name = "vScrollBar";
             vScrollBar.Size = new Size(17, 256);
             vScrollBar.TabIndex = 13;
+            vScrollBar.Scroll += ScrollBar_Scroll;
             // 
             // hScrollBar
             // 
@@ -284,7 +291,7 @@
             hScrollBar.Name = "hScrollBar";
             hScrollBar.Size = new Size(480, 14);
             hScrollBar.TabIndex = 14;
-            hScrollBar.Scroll += hScrollBar_Scroll;
+            hScrollBar.Scroll += ScrollBar_Scroll;
             // 
             // btnHarp
             // 
@@ -505,7 +512,7 @@
             volumeBar.TabIndex = 31;
             volumeBar.TickFrequency = 10;
             volumeBar.TickStyle = TickStyle.Both;
-            volumeBar.Value = 10;
+            volumeBar.Value = 100;
             volumeBar.Scroll += volumeBar_Scroll;
             // 
             // label4
@@ -528,30 +535,32 @@
             lblVolume.Name = "lblVolume";
             lblVolume.Size = new Size(49, 15);
             lblVolume.TabIndex = 33;
-            lblVolume.Text = "10%";
+            lblVolume.Text = "100%";
             lblVolume.TextAlign = ContentAlignment.MiddleCenter;
             // 
             // openFileDialog1
             // 
             openFileDialog1.FileName = "openFileDialog1";
             // 
-            // pictureBox1
+            // pbx_Piano
             // 
-            pictureBox1.Anchor = AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
-            pictureBox1.BackColor = Color.FromArgb(40, 40, 40);
-            pictureBox1.BackgroundImageLayout = ImageLayout.None;
-            pictureBox1.BorderStyle = BorderStyle.FixedSingle;
-            pictureBox1.Location = new Point(13, 343);
-            pictureBox1.Margin = new Padding(4, 3, 4, 3);
-            pictureBox1.Name = "pictureBox1";
-            pictureBox1.Size = new Size(756, 122);
-            pictureBox1.TabIndex = 34;
-            pictureBox1.TabStop = false;
+            pbx_Piano.Anchor = AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            pbx_Piano.BackColor = Color.DimGray;
+            pbx_Piano.BackgroundImageLayout = ImageLayout.None;
+            pbx_Piano.BorderStyle = BorderStyle.FixedSingle;
+            pbx_Piano.Location = new Point(13, 343);
+            pbx_Piano.Margin = new Padding(4, 3, 4, 3);
+            pbx_Piano.Name = "pbx_Piano";
+            pbx_Piano.Size = new Size(756, 122);
+            pbx_Piano.TabIndex = 34;
+            pbx_Piano.TabStop = false;
+            pbx_Piano.Paint += pbx_Piano_Paint;
+            pbx_Piano.MouseDown += pbx_Piano_MouseDown;
             // 
             // sts_Status
             // 
             sts_Status.BackColor = Color.FromArgb(20, 20, 20);
-            sts_Status.Items.AddRange(new ToolStripItem[] { tsl_Instrument, tsl_SoundsPlaying, tsl_TotalNotes });
+            sts_Status.Items.AddRange(new ToolStripItem[] { tsl_Instrument, tsl_SoundsPlaying, tsl_TotalNotes, tsl_LastTickMS });
             sts_Status.Location = new Point(0, 466);
             sts_Status.Name = "sts_Status";
             sts_Status.Size = new Size(782, 22);
@@ -562,7 +571,7 @@
             // 
             tsl_Instrument.ForeColor = Color.White;
             tsl_Instrument.Name = "tsl_Instrument";
-            tsl_Instrument.Size = new Size(245, 17);
+            tsl_Instrument.Size = new Size(191, 17);
             tsl_Instrument.Spring = true;
             tsl_Instrument.Text = "Instrument: Harp";
             // 
@@ -570,7 +579,7 @@
             // 
             tsl_SoundsPlaying.ForeColor = Color.White;
             tsl_SoundsPlaying.Name = "tsl_SoundsPlaying";
-            tsl_SoundsPlaying.Size = new Size(245, 17);
+            tsl_SoundsPlaying.Size = new Size(191, 17);
             tsl_SoundsPlaying.Spring = true;
             tsl_SoundsPlaying.Text = "Sounds Playing: 0";
             // 
@@ -578,9 +587,28 @@
             // 
             tsl_TotalNotes.ForeColor = Color.White;
             tsl_TotalNotes.Name = "tsl_TotalNotes";
-            tsl_TotalNotes.Size = new Size(245, 17);
+            tsl_TotalNotes.Size = new Size(191, 17);
             tsl_TotalNotes.Spring = true;
             tsl_TotalNotes.Text = "Total Notes: 0";
+            // 
+            // tsl_LastTickMS
+            // 
+            tsl_LastTickMS.ForeColor = Color.White;
+            tsl_LastTickMS.Name = "tsl_LastTickMS";
+            tsl_LastTickMS.Size = new Size(191, 17);
+            tsl_LastTickMS.Spring = true;
+            tsl_LastTickMS.Text = "Last Tick: 0ms";
+            // 
+            // pbx_Layers
+            // 
+            pbx_Layers.BackColor = Color.FromArgb(20, 20, 20);
+            pbx_Layers.BackgroundImageLayout = ImageLayout.None;
+            pbx_Layers.Location = new Point(85, 99);
+            pbx_Layers.Margin = new Padding(4, 3, 4, 3);
+            pbx_Layers.Name = "pbx_Layers";
+            pbx_Layers.Size = new Size(181, 224);
+            pbx_Layers.TabIndex = 36;
+            pbx_Layers.TabStop = false;
             // 
             // Form1
             // 
@@ -588,8 +616,9 @@
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = Color.FromArgb(20, 20, 20);
             ClientSize = new Size(782, 488);
+            Controls.Add(pbx_Layers);
             Controls.Add(sts_Status);
-            Controls.Add(pictureBox1);
+            Controls.Add(pbx_Piano);
             Controls.Add(lblVolume);
             Controls.Add(label4);
             Controls.Add(volumeBar);
@@ -612,11 +641,11 @@
             Controls.Add(hScrollBar);
             Controls.Add(vScrollBar);
             Controls.Add(picBox);
-            Controls.Add(textBox1);
+            Controls.Add(tbx_Position);
             Controls.Add(label3);
             Controls.Add(num_TPS);
-            Controls.Add(label2);
-            Controls.Add(label1);
+            Controls.Add(lbl_SongTotalTime);
+            Controls.Add(lbl_SongCurrentTime);
             Controls.Add(btnForward);
             Controls.Add(btnReverse);
             Controls.Add(btnStop);
@@ -635,9 +664,10 @@
             ((System.ComponentModel.ISupportInitialize)num_TPS).EndInit();
             ((System.ComponentModel.ISupportInitialize)picBox).EndInit();
             ((System.ComponentModel.ISupportInitialize)volumeBar).EndInit();
-            ((System.ComponentModel.ISupportInitialize)pictureBox1).EndInit();
+            ((System.ComponentModel.ISupportInitialize)pbx_Piano).EndInit();
             sts_Status.ResumeLayout(false);
             sts_Status.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)pbx_Layers).EndInit();
             ResumeLayout(false);
             PerformLayout();
         }
@@ -655,11 +685,11 @@
         private System.Windows.Forms.Button btnStop;
         private System.Windows.Forms.Button btnReverse;
         private System.Windows.Forms.Button btnForward;
-        private System.Windows.Forms.Label label1;
-        private System.Windows.Forms.Label label2;
+        private System.Windows.Forms.Label lbl_SongCurrentTime;
+        private System.Windows.Forms.Label lbl_SongTotalTime;
         private System.Windows.Forms.NumericUpDown numericUpDown1;
         private System.Windows.Forms.Label label3;
-        private System.Windows.Forms.TextBox textBox1;
+        private System.Windows.Forms.TextBox tbx_Position;
         private System.Windows.Forms.PictureBox picBox;
         private System.Windows.Forms.VScrollBar vScrollBar;
         private System.Windows.Forms.HScrollBar hScrollBar;
@@ -684,11 +714,13 @@
         private System.Windows.Forms.Label lblVolume;
         private System.Windows.Forms.OpenFileDialog openFileDialog1;
         private NumericUpDown num_TPS;
-        private PictureBox pictureBox1;
+        private PictureBox pbx_Piano;
         private StatusStrip sts_Status;
         private ToolStripStatusLabel tsl_Instrument;
         private ToolStripStatusLabel tsl_SoundsPlaying;
         private ToolStripStatusLabel tsl_TotalNotes;
+        private PictureBox pbx_Layers;
+        private ToolStripStatusLabel tsl_LastTickMS;
     }
 }
 
