@@ -134,9 +134,10 @@
             btnSave.Location = new Point(12, 36);
             btnSave.Margin = new Padding(4, 3, 4, 3);
             btnSave.Name = "btnSave";
-            btnSave.Size = new Size(18, 17);
+            btnSave.Size = new Size(20, 20);
             btnSave.TabIndex = 0;
             btnSave.UseVisualStyleBackColor = true;
+            btnSave.Click += btnSave_Click;
             // 
             // btnPlay
             // 
@@ -147,7 +148,7 @@
             btnPlay.Location = new Point(36, 36);
             btnPlay.Margin = new Padding(4, 3, 4, 3);
             btnPlay.Name = "btnPlay";
-            btnPlay.Size = new Size(18, 17);
+            btnPlay.Size = new Size(20, 20);
             btnPlay.TabIndex = 1;
             btnPlay.UseVisualStyleBackColor = true;
             btnPlay.Click += btnPlay_Click;
@@ -161,7 +162,7 @@
             btnStop.Location = new Point(61, 36);
             btnStop.Margin = new Padding(4, 3, 4, 3);
             btnStop.Name = "btnStop";
-            btnStop.Size = new Size(18, 17);
+            btnStop.Size = new Size(20, 20);
             btnStop.TabIndex = 2;
             btnStop.UseVisualStyleBackColor = true;
             btnStop.Click += btnStop_Click;
@@ -175,7 +176,7 @@
             btnReverse.Location = new Point(85, 36);
             btnReverse.Margin = new Padding(4, 3, 4, 3);
             btnReverse.Name = "btnReverse";
-            btnReverse.Size = new Size(18, 17);
+            btnReverse.Size = new Size(20, 20);
             btnReverse.TabIndex = 3;
             btnReverse.UseVisualStyleBackColor = true;
             // 
@@ -188,7 +189,7 @@
             btnForward.Location = new Point(110, 36);
             btnForward.Margin = new Padding(4, 3, 4, 3);
             btnForward.Name = "btnForward";
-            btnForward.Size = new Size(18, 17);
+            btnForward.Size = new Size(20, 20);
             btnForward.TabIndex = 4;
             btnForward.UseVisualStyleBackColor = true;
             // 
@@ -269,9 +270,8 @@
             picBox.Size = new Size(480, 256);
             picBox.TabIndex = 10;
             picBox.TabStop = false;
-            picBox.LoadCompleted += picBox_LoadCompleted;
             picBox.Paint += picBox_Paint;
-            picBox.MouseDown += picBox_MouseClick;
+            picBox.MouseDown += picBox_MouseDown;
             // 
             // vScrollBar
             // 
@@ -299,10 +299,10 @@
             btnHarp.BackgroundImageLayout = ImageLayout.Stretch;
             btnHarp.FlatAppearance.BorderSize = 0;
             btnHarp.FlatStyle = FlatStyle.Flat;
-            btnHarp.Location = new Point(168, 35);
+            btnHarp.Location = new Point(213, 35);
             btnHarp.Margin = new Padding(4, 3, 4, 3);
             btnHarp.Name = "btnHarp";
-            btnHarp.Size = new Size(19, 18);
+            btnHarp.Size = new Size(20, 20);
             btnHarp.TabIndex = 15;
             btnHarp.UseVisualStyleBackColor = true;
             // 
@@ -312,10 +312,10 @@
             btnDBass.BackgroundImageLayout = ImageLayout.Stretch;
             btnDBass.FlatAppearance.BorderSize = 0;
             btnDBass.FlatStyle = FlatStyle.Flat;
-            btnDBass.Location = new Point(194, 35);
+            btnDBass.Location = new Point(236, 35);
             btnDBass.Margin = new Padding(4, 3, 4, 3);
             btnDBass.Name = "btnDBass";
-            btnDBass.Size = new Size(19, 18);
+            btnDBass.Size = new Size(20, 20);
             btnDBass.TabIndex = 16;
             btnDBass.UseVisualStyleBackColor = true;
             // 
@@ -325,10 +325,10 @@
             btnBDrum.BackgroundImageLayout = ImageLayout.Stretch;
             btnBDrum.FlatAppearance.BorderSize = 0;
             btnBDrum.FlatStyle = FlatStyle.Flat;
-            btnBDrum.Location = new Point(219, 35);
+            btnBDrum.Location = new Point(258, 35);
             btnBDrum.Margin = new Padding(4, 3, 4, 3);
             btnBDrum.Name = "btnBDrum";
-            btnBDrum.Size = new Size(19, 18);
+            btnBDrum.Size = new Size(20, 20);
             btnBDrum.TabIndex = 17;
             btnBDrum.UseVisualStyleBackColor = true;
             // 
@@ -338,10 +338,10 @@
             btnSnare.BackgroundImageLayout = ImageLayout.Stretch;
             btnSnare.FlatAppearance.BorderSize = 0;
             btnSnare.FlatStyle = FlatStyle.Flat;
-            btnSnare.Location = new Point(245, 35);
+            btnSnare.Location = new Point(281, 35);
             btnSnare.Margin = new Padding(4, 3, 4, 3);
             btnSnare.Name = "btnSnare";
-            btnSnare.Size = new Size(19, 18);
+            btnSnare.Size = new Size(20, 20);
             btnSnare.TabIndex = 18;
             btnSnare.UseVisualStyleBackColor = true;
             // 
@@ -351,10 +351,10 @@
             btnBell.BackgroundImageLayout = ImageLayout.Stretch;
             btnBell.FlatAppearance.BorderSize = 0;
             btnBell.FlatStyle = FlatStyle.Flat;
-            btnBell.Location = new Point(348, 35);
+            btnBell.Location = new Point(372, 35);
             btnBell.Margin = new Padding(4, 3, 4, 3);
             btnBell.Name = "btnBell";
-            btnBell.Size = new Size(19, 18);
+            btnBell.Size = new Size(20, 20);
             btnBell.TabIndex = 22;
             btnBell.UseVisualStyleBackColor = true;
             // 
@@ -364,10 +364,10 @@
             btnFlute.BackgroundImageLayout = ImageLayout.Stretch;
             btnFlute.FlatAppearance.BorderSize = 0;
             btnFlute.FlatStyle = FlatStyle.Flat;
-            btnFlute.Location = new Point(322, 35);
+            btnFlute.Location = new Point(349, 35);
             btnFlute.Margin = new Padding(4, 3, 4, 3);
             btnFlute.Name = "btnFlute";
-            btnFlute.Size = new Size(19, 18);
+            btnFlute.Size = new Size(20, 20);
             btnFlute.TabIndex = 21;
             btnFlute.UseVisualStyleBackColor = true;
             // 
@@ -377,10 +377,10 @@
             btnGuitar.BackgroundImageLayout = ImageLayout.Stretch;
             btnGuitar.FlatAppearance.BorderSize = 0;
             btnGuitar.FlatStyle = FlatStyle.Flat;
-            btnGuitar.Location = new Point(296, 35);
+            btnGuitar.Location = new Point(326, 35);
             btnGuitar.Margin = new Padding(4, 3, 4, 3);
             btnGuitar.Name = "btnGuitar";
-            btnGuitar.Size = new Size(19, 18);
+            btnGuitar.Size = new Size(20, 20);
             btnGuitar.TabIndex = 20;
             btnGuitar.UseVisualStyleBackColor = true;
             // 
@@ -390,10 +390,10 @@
             btnClick.BackgroundImageLayout = ImageLayout.Stretch;
             btnClick.FlatAppearance.BorderSize = 0;
             btnClick.FlatStyle = FlatStyle.Flat;
-            btnClick.Location = new Point(271, 35);
+            btnClick.Location = new Point(304, 35);
             btnClick.Margin = new Padding(4, 3, 4, 3);
             btnClick.Name = "btnClick";
-            btnClick.Size = new Size(19, 18);
+            btnClick.Size = new Size(20, 20);
             btnClick.TabIndex = 19;
             btnClick.UseVisualStyleBackColor = true;
             // 
@@ -403,10 +403,10 @@
             btnCowbell.BackgroundImageLayout = ImageLayout.Stretch;
             btnCowbell.FlatAppearance.BorderSize = 0;
             btnCowbell.FlatStyle = FlatStyle.Flat;
-            btnCowbell.Location = new Point(450, 35);
+            btnCowbell.Location = new Point(462, 35);
             btnCowbell.Margin = new Padding(4, 3, 4, 3);
             btnCowbell.Name = "btnCowbell";
-            btnCowbell.Size = new Size(19, 18);
+            btnCowbell.Size = new Size(20, 20);
             btnCowbell.TabIndex = 26;
             btnCowbell.UseVisualStyleBackColor = true;
             // 
@@ -416,10 +416,10 @@
             btnIronXylophone.BackgroundImageLayout = ImageLayout.Stretch;
             btnIronXylophone.FlatAppearance.BorderSize = 0;
             btnIronXylophone.FlatStyle = FlatStyle.Flat;
-            btnIronXylophone.Location = new Point(425, 35);
+            btnIronXylophone.Location = new Point(440, 35);
             btnIronXylophone.Margin = new Padding(4, 3, 4, 3);
             btnIronXylophone.Name = "btnIronXylophone";
-            btnIronXylophone.Size = new Size(19, 18);
+            btnIronXylophone.Size = new Size(20, 20);
             btnIronXylophone.TabIndex = 25;
             btnIronXylophone.UseVisualStyleBackColor = true;
             // 
@@ -429,10 +429,10 @@
             btnXylophone.BackgroundImageLayout = ImageLayout.Stretch;
             btnXylophone.FlatAppearance.BorderSize = 0;
             btnXylophone.FlatStyle = FlatStyle.Flat;
-            btnXylophone.Location = new Point(399, 35);
+            btnXylophone.Location = new Point(417, 35);
             btnXylophone.Margin = new Padding(4, 3, 4, 3);
             btnXylophone.Name = "btnXylophone";
-            btnXylophone.Size = new Size(19, 18);
+            btnXylophone.Size = new Size(20, 20);
             btnXylophone.TabIndex = 24;
             btnXylophone.UseVisualStyleBackColor = true;
             // 
@@ -442,10 +442,10 @@
             btnChime.BackgroundImageLayout = ImageLayout.Stretch;
             btnChime.FlatAppearance.BorderSize = 0;
             btnChime.FlatStyle = FlatStyle.Flat;
-            btnChime.Location = new Point(373, 35);
+            btnChime.Location = new Point(394, 35);
             btnChime.Margin = new Padding(4, 3, 4, 3);
             btnChime.Name = "btnChime";
-            btnChime.Size = new Size(19, 18);
+            btnChime.Size = new Size(20, 20);
             btnChime.TabIndex = 23;
             btnChime.UseVisualStyleBackColor = true;
             // 
@@ -458,7 +458,7 @@
             btnPling.Location = new Point(553, 35);
             btnPling.Margin = new Padding(4, 3, 4, 3);
             btnPling.Name = "btnPling";
-            btnPling.Size = new Size(19, 18);
+            btnPling.Size = new Size(20, 20);
             btnPling.TabIndex = 30;
             btnPling.UseVisualStyleBackColor = true;
             // 
@@ -468,10 +468,10 @@
             btnBanjo.BackgroundImageLayout = ImageLayout.Stretch;
             btnBanjo.FlatAppearance.BorderSize = 0;
             btnBanjo.FlatStyle = FlatStyle.Flat;
-            btnBanjo.Location = new Point(527, 35);
+            btnBanjo.Location = new Point(530, 35);
             btnBanjo.Margin = new Padding(4, 3, 4, 3);
             btnBanjo.Name = "btnBanjo";
-            btnBanjo.Size = new Size(19, 18);
+            btnBanjo.Size = new Size(20, 20);
             btnBanjo.TabIndex = 29;
             btnBanjo.UseVisualStyleBackColor = true;
             // 
@@ -481,10 +481,10 @@
             btnBit.BackgroundImageLayout = ImageLayout.Stretch;
             btnBit.FlatAppearance.BorderSize = 0;
             btnBit.FlatStyle = FlatStyle.Flat;
-            btnBit.Location = new Point(502, 35);
+            btnBit.Location = new Point(508, 35);
             btnBit.Margin = new Padding(4, 3, 4, 3);
             btnBit.Name = "btnBit";
-            btnBit.Size = new Size(19, 18);
+            btnBit.Size = new Size(20, 20);
             btnBit.TabIndex = 28;
             btnBit.UseVisualStyleBackColor = true;
             // 
@@ -494,10 +494,10 @@
             btnDidgeridoo.BackgroundImageLayout = ImageLayout.Stretch;
             btnDidgeridoo.FlatAppearance.BorderSize = 0;
             btnDidgeridoo.FlatStyle = FlatStyle.Flat;
-            btnDidgeridoo.Location = new Point(476, 35);
+            btnDidgeridoo.Location = new Point(485, 35);
             btnDidgeridoo.Margin = new Padding(4, 3, 4, 3);
             btnDidgeridoo.Name = "btnDidgeridoo";
-            btnDidgeridoo.Size = new Size(19, 18);
+            btnDidgeridoo.Size = new Size(20, 20);
             btnDidgeridoo.TabIndex = 27;
             btnDidgeridoo.UseVisualStyleBackColor = true;
             // 
@@ -603,12 +603,16 @@
             // 
             pbx_Layers.BackColor = Color.FromArgb(20, 20, 20);
             pbx_Layers.BackgroundImageLayout = ImageLayout.None;
-            pbx_Layers.Location = new Point(85, 99);
+            pbx_Layers.Location = new Point(82, 99);
             pbx_Layers.Margin = new Padding(4, 3, 4, 3);
             pbx_Layers.Name = "pbx_Layers";
-            pbx_Layers.Size = new Size(181, 224);
+            pbx_Layers.Size = new Size(190, 224);
             pbx_Layers.TabIndex = 36;
             pbx_Layers.TabStop = false;
+            pbx_Layers.Paint += pbx_Layers_Paint;
+            pbx_Layers.MouseDown += pbx_Layers_MouseDown;
+            pbx_Layers.MouseLeave += pbx_Layers_MouseLeave;
+            pbx_Layers.MouseMove += pbx_Layers_MouseMove;
             // 
             // Form1
             // 

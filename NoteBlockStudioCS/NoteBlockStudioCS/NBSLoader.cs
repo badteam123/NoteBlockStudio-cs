@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Reflection.Metadata.Ecma335;
 
 namespace NoteBlockStudioCS {
     internal class NBSLoader {
@@ -125,7 +126,7 @@ namespace NoteBlockStudioCS {
             /*
              * Version: {Version}\nVanillaInstrumentCount: {VanillaInstrumentCount}\nSongLength: {SongLength}\nLayerCount: {LayerCount}\nSongName: {SongName}\nSongAuthor: {SongAuthor}\nSongOriginalAuthor: {SongOriginalAuthor}\nSongDescription: {SongDescription}\nSongTempo: {SongTempo}\nAutoSaving: {AutoSaving}\nAutoSavingDuration: {AutoSavingDuration}\nTimeSignature: {TimeSignature}\nMinutesSpent: {MinutesSpent}\nLeftClicks: {LeftClicks}\nRightClicks: {RightClicks}\nNoteBlocksAdded: {NoteBlocksAdded}\nNoteBlocksRemoved: {NoteBlocksRemoved}\nMidiSchematicFileName: {MidiSchematicFileName}\nLooping: {Looping}\nMaxLoopCount: {MaxLoopCount}\nLoopStartTick: {LoopStartTick}\n
             */
-            MessageBox.Show($"Version: {Version}\nVanillaInstrumentCount: {VanillaInstrumentCount}\nSongLength: {SongLength}\nLayerCount: {LayerCount}\nSongName: {SongName}\nSongAuthor: {SongAuthor}\nSongOriginalAuthor: {SongOriginalAuthor}\nSongDescription: {SongDescription}\nSongTempo: {SongTempo}\nAutoSaving: {AutoSaving}\nAutoSavingDuration: {AutoSavingDuration}\nTimeSignature: {TimeSignature}\nMinutesSpent: {MinutesSpent}\nLeftClicks: {LeftClicks}\nRightClicks: {RightClicks}\nNoteBlocksAdded: {NoteBlocksAdded}\nNoteBlocksRemoved: {NoteBlocksRemoved}\nMidiSchematicFileName: {MidiSchematicFileName}\nLooping: {Looping}\nMaxLoopCount: {MaxLoopCount}\nLoopStartTick: {LoopStartTick}\n");
+             // MessageBox.Show($"Version: {Version}\nVanillaInstrumentCount: {VanillaInstrumentCount}\nSongLength: {SongLength}\nLayerCount: {LayerCount}\nSongName: {SongName}\nSongAuthor: {SongAuthor}\nSongOriginalAuthor: {SongOriginalAuthor}\nSongDescription: {SongDescription}\nSongTempo: {SongTempo}\nAutoSaving: {AutoSaving}\nAutoSavingDuration: {AutoSavingDuration}\nTimeSignature: {TimeSignature}\nMinutesSpent: {MinutesSpent}\nLeftClicks: {LeftClicks}\nRightClicks: {RightClicks}\nNoteBlocksAdded: {NoteBlocksAdded}\nNoteBlocksRemoved: {NoteBlocksRemoved}\nMidiSchematicFileName: {MidiSchematicFileName}\nLooping: {Looping}\nMaxLoopCount: {MaxLoopCount}\nLoopStartTick: {LoopStartTick}\n");
 
         }
     }
@@ -147,6 +148,7 @@ namespace NoteBlockStudioCS {
             InstrumentNum = instrument;
             Key = key;
             Velocity = velocity;
+            Panning = panning;
             Pitch = pitch;
             switch (InstrumentNum) {
                 case 0:
@@ -206,18 +208,31 @@ namespace NoteBlockStudioCS {
     }
 
     internal class Layer {
+        // Used in save
         public string Name;
         public sbyte Locked;
         public sbyte Volume;
         public byte Stereo;
 
-        public Layer() : this("", 0, 100, 0) { }
+        // Unused in save
+        public bool Solo;
+        public bool Lock { get { return Locked == 1; } set { Locked = (sbyte)(value ? 1 : 0); } }
+
+        public Layer() : this("", 0, 100, 100) { }
 
         public Layer(string name, sbyte locked, sbyte volume, byte stereo) {
             Name = name;
             Locked = locked;
             Volume = volume;
             Stereo = stereo;
+            Solo = false;
+        }
+
+        public bool IsSafeToDelete(int layerIndex, int highestYNote) {
+            if (layerIndex > highestYNote && Volume == 100 && Stereo == 100 && Locked == 0) {
+                return true;
+            }
+            return false;
         }
     }
 }
