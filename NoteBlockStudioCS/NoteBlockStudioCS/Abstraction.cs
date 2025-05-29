@@ -94,11 +94,11 @@ namespace NoteBlockStudioCS {
                         break;
                     }
                 case LayerSetting.SetStereo: {
-                        layers[layer].Stereo = (byte)Math.Clamp(value, 0, 100);
+                        layers[layer].Stereo = (byte)Math.Clamp(value, 0, 200);
                         break;
                     }
                 case LayerSetting.AddStereo: {
-                        layers[layer].Stereo = (byte)Math.Clamp(layers[layer].Stereo + value, 0, 100);
+                        layers[layer].Stereo = (byte)Math.Clamp(layers[layer].Stereo + value, 0, 200);
                         break;
                     }
             }
@@ -133,41 +133,56 @@ namespace NoteBlockStudioCS {
             pbx_Layers.Invalidate();
         }
 
+        public void SetLayer(int layer, sbyte volume, byte stereo) {
+            if (layer < 0) {
+                return;
+            }
+            while (layers.Count <= layer) {
+                layers.Add(new Layer());
+            }
+            layers[layer].Volume = volume;
+            layers[layer].Stereo = stereo;
+        }
+
         private void AddBlock(int x, int y) {
             AddBlock(x, y, new NoteBlock(x, y, (sbyte)instrumentSelected, keySelected, 100, 100, 0));
         }
 
         private void AddBlock(int x, int y, NoteBlock nb) {
 
-            NoteBlocksAdded++;
+            if (!connected) {
+                NoteBlocksAdded++;
 
-            if (!notes.ContainsKey(x))
-                notes[x] = new Dictionary<int, NoteBlock>();
-            if (!notes[x].ContainsKey(y)) {
-                totalNotes++;
-            }
-            notes[x][y] = nb;
-
-            if (y >= layers.Count) {
-                for (int i = layers.Count; i <= y; i++) {
-                    layers.Add(new Layer());
+                if (!notes.ContainsKey(x))
+                    notes[x] = new Dictionary<int, NoteBlock>();
+                if (!notes[x].ContainsKey(y)) {
+                    totalNotes++;
                 }
-                pbx_Layers.Invalidate();
+                notes[x][y] = nb;
+
+                if (y >= layers.Count) {
+                    for (int i = layers.Count; i <= y; i++) {
+                        layers.Add(new Layer());
+                    }
+                    pbx_Layers.Invalidate();
+                }
+
+                tsl_TotalNotes.Text = $"Total Notes: {totalNotes}";
+                if (x >= farthestNoteX) {
+                    farthestNoteX = x;
+                }
+
+                if (y >= farthestNoteY) {
+                    farthestNoteY = y;
+                }
+
+                hScrollBar.Maximum = farthestNoteX;
+                vScrollBar.Maximum = farthestNoteY;
+
+                picBox.Invalidate(new Rectangle((x - hScrollBar.Value) * 32, ((y - vScrollBar.Value) * 32) + 32, 32, 32));
+            } else {
+
             }
-
-            tsl_TotalNotes.Text = $"Total Notes: {totalNotes}";
-            if (x >= farthestNoteX) {
-                farthestNoteX = x;
-            }
-
-            if (y >= farthestNoteY) {
-                farthestNoteY = y;
-            }
-
-            hScrollBar.Maximum = farthestNoteX;
-            vScrollBar.Maximum = farthestNoteY;
-
-            picBox.Invalidate(new Rectangle((x - hScrollBar.Value) * 32, ((y - vScrollBar.Value) * 32) + 32, 32, 32));
         }
 
         private void RemoveBlock(int x, int y) {

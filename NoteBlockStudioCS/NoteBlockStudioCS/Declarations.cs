@@ -95,7 +95,7 @@ namespace NoteBlockStudioCS {
 
         HighResolutionTimer timer = new HighResolutionTimer();
 
-        public enum ins {
+        public enum ins : byte {
             harp = 0,
             dbass = 1,
             bdrum = 2,

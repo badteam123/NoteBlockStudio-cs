@@ -26,13 +26,11 @@ namespace NoteBlockStudioCS {
                 layers.Add(new Layer());
             }
 
-            Debug.WriteLine($"count: {layers.Count}");
-
             switch (posX) {
                 case 0: {
                         int delta = (int)Math.Sign(e.Delta) * (keyStates[Keys.ShiftKey] ? 1 : 10);
                         var L = layers[idx];
-                        ModifyLayer(idx, LayerSetting.AddLayer, delta);
+                        ModifyLayer(idx, LayerSetting.AddVolume, delta);
                         //L.Volume = (sbyte)Math.Clamp(L.Volume + delta, 0, 100);
                         break;
                     }

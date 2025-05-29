@@ -117,10 +117,10 @@ namespace NoteBlockStudioCS {
                 // Stereo
                 g.DrawLine(Pens.WhiteSmoke, 28, 16 + (i * 32), 42, 16 + (i * 32));
                 if (i + vScrollBar.Value < layers.Count) {
-                    int offset = 14 - (layers[i + vScrollBar.Value].Stereo * 14) / 200;
-                    g.FillRectangle(Brushes.Red, 27 + offset, 15 + (i * 32), 3, 3);
+                    int offset = (layers[i + vScrollBar.Value].Stereo * 14) / 200;
+                    g.FillRectangle(Brushes.LightBlue, 27 + offset, 13 + (i * 32), 3, 7);
                 } else {
-                    g.FillRectangle(Brushes.Red, 34, 15 + (i * 32), 3, 3);
+                    g.FillRectangle(Brushes.LightBlue, 34, 13 + (i * 32), 3, 7);
                 }
 
                 // Mute

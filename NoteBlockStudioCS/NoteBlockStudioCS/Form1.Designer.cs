@@ -30,6 +30,10 @@
             openSongToolStripMenuItem = new ToolStripMenuItem();
             editToolStripMenuItem = new ToolStripMenuItem();
             settingsToolStripMenuItem = new ToolStripMenuItem();
+            connectToolStripMenuItem = new ToolStripMenuItem();
+            tsi_HostJoin = new ToolStripMenuItem();
+            stopHostingToolStripMenuItem = new ToolStripMenuItem();
+            disconnectToolStripMenuItem = new ToolStripMenuItem();
             btnSave = new Button();
             btnPlay = new Button();
             btnStop = new Button();
@@ -83,7 +87,7 @@
             // 
             menu.BackgroundImage = (Image)resources.GetObject("menu.BackgroundImage");
             menu.BackgroundImageLayout = ImageLayout.None;
-            menu.Items.AddRange(new ToolStripItem[] { fileToolStripMenuItem, editToolStripMenuItem, settingsToolStripMenuItem });
+            menu.Items.AddRange(new ToolStripItem[] { fileToolStripMenuItem, editToolStripMenuItem, settingsToolStripMenuItem, connectToolStripMenuItem });
             menu.Location = new Point(0, 0);
             menu.Name = "menu";
             menu.Padding = new Padding(7, 2, 0, 2);
@@ -124,6 +128,35 @@
             settingsToolStripMenuItem.Name = "settingsToolStripMenuItem";
             settingsToolStripMenuItem.Size = new Size(61, 20);
             settingsToolStripMenuItem.Text = "Settings";
+            // 
+            // connectToolStripMenuItem
+            // 
+            connectToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { tsi_HostJoin, stopHostingToolStripMenuItem, disconnectToolStripMenuItem });
+            connectToolStripMenuItem.ForeColor = Color.DimGray;
+            connectToolStripMenuItem.Name = "connectToolStripMenuItem";
+            connectToolStripMenuItem.Size = new Size(64, 20);
+            connectToolStripMenuItem.Text = "Connect";
+            // 
+            // tsi_HostJoin
+            // 
+            tsi_HostJoin.Name = "tsi_HostJoin";
+            tsi_HostJoin.Size = new Size(180, 22);
+            tsi_HostJoin.Text = "Host / Join";
+            tsi_HostJoin.Click += tsi_HostJoin_Click;
+            // 
+            // stopHostingToolStripMenuItem
+            // 
+            stopHostingToolStripMenuItem.Enabled = false;
+            stopHostingToolStripMenuItem.Name = "stopHostingToolStripMenuItem";
+            stopHostingToolStripMenuItem.Size = new Size(180, 22);
+            stopHostingToolStripMenuItem.Text = "Stop Hosting";
+            // 
+            // disconnectToolStripMenuItem
+            // 
+            disconnectToolStripMenuItem.Enabled = false;
+            disconnectToolStripMenuItem.Name = "disconnectToolStripMenuItem";
+            disconnectToolStripMenuItem.Size = new Size(180, 22);
+            disconnectToolStripMenuItem.Text = "Disconnect";
             // 
             // btnSave
             // 
@@ -725,6 +758,10 @@
         private ToolStripStatusLabel tsl_TotalNotes;
         private PictureBox pbx_Layers;
         private ToolStripStatusLabel tsl_LastTickMS;
+        private ToolStripMenuItem connectToolStripMenuItem;
+        private ToolStripMenuItem tsi_HostJoin;
+        private ToolStripMenuItem stopHostingToolStripMenuItem;
+        private ToolStripMenuItem disconnectToolStripMenuItem;
     }
 }
 
