@@ -86,8 +86,8 @@ namespace NoteBlockStudioCS {
         public PlaceNotePacket(int x, int y, Form1.ins ins, sbyte key) {
             X = x;
             Y = y;
-            Key = key;
             Instrument = ins;
+            Key = key;
         }
 
         /// <summary>
@@ -97,8 +97,8 @@ namespace NoteBlockStudioCS {
         protected override void WritePayload(BinaryWriter writer) {
             writer.Write(X);
             writer.Write(Y);
-            writer.Write(Key);
             writer.Write((byte)Instrument);
+            writer.Write(Key);
         }
 
         /// <summary>

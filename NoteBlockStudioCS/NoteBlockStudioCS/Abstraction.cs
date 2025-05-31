@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -148,45 +149,65 @@ namespace NoteBlockStudioCS {
             AddBlock(x, y, new NoteBlock(x, y, (sbyte)instrumentSelected, keySelected, 100, 100, 0));
         }
 
-        private void AddBlock(int x, int y, NoteBlock nb) {
-
-            if (!connected) {
-                NoteBlocksAdded++;
-
-                if (!notes.ContainsKey(x))
-                    notes[x] = new Dictionary<int, NoteBlock>();
-                if (!notes[x].ContainsKey(y)) {
-                    totalNotes++;
-                }
-                notes[x][y] = nb;
-
-                if (y >= layers.Count) {
-                    for (int i = layers.Count; i <= y; i++) {
-                        layers.Add(new Layer());
-                    }
-                    pbx_Layers.Invalidate();
-                }
-
-                tsl_TotalNotes.Text = $"Total Notes: {totalNotes}";
-                if (x >= farthestNoteX) {
-                    farthestNoteX = x;
-                }
-
-                if (y >= farthestNoteY) {
-                    farthestNoteY = y;
-                }
-
-                hScrollBar.Maximum = farthestNoteX;
-                vScrollBar.Maximum = farthestNoteY;
-
-                picBox.Invalidate(new Rectangle((x - hScrollBar.Value) * 32, ((y - vScrollBar.Value) * 32) + 32, 32, 32));
+        async private void AddBlock(int x, int y, NoteBlock nb, bool force = false) {
+            if (connected && !hosting && !force) {
+                PlaceNotePacket packet = new PlaceNotePacket(x, y, (ins)nb.InstrumentNum, nb.Key);
+                SendToServer(packet);
             } else {
-
+                if (connected && hosting && !force) {
+                    PlaceNotePacket packet = new PlaceNotePacket(x, y, (ins)nb.InstrumentNum, nb.Key);
+                    server.SendToAllClientsAsync(packet);
+                }
+                AddBlockRaw(x, y, nb);
             }
         }
 
-        private void RemoveBlock(int x, int y) {
+        private void AddBlockRaw(int x, int y, NoteBlock nb) {
+            NoteBlocksAdded++;
 
+            if (!notes.ContainsKey(x))
+                notes[x] = new Dictionary<int, NoteBlock>();
+            if (!notes[x].ContainsKey(y)) {
+                totalNotes++;
+            }
+            notes[x][y] = nb;
+
+            if (y >= layers.Count) {
+                for (int i = layers.Count; i <= y; i++) {
+                    layers.Add(new Layer());
+                }
+                pbx_Layers.Invalidate();
+            }
+
+            tsl_TotalNotes.Text = $"Total Notes: {totalNotes}";
+            if (x >= farthestNoteX) {
+                farthestNoteX = x;
+            }
+
+            if (y >= farthestNoteY) {
+                farthestNoteY = y;
+            }
+
+            hScrollBar.Maximum = farthestNoteX;
+            vScrollBar.Maximum = farthestNoteY;
+
+            picBox.Invalidate(new Rectangle((x - hScrollBar.Value) * 32, ((y - vScrollBar.Value) * 32) + 32, 32, 32));
+        }
+
+        async private void RemoveBlock(int x, int y, bool force = false) {
+            if (connected && !hosting && !force) {
+                RemoveNotePacket packet = new RemoveNotePacket(x, y);
+                SendToServer(packet);
+            } else {
+                if (connected && hosting && !force) {
+                    RemoveNotePacket packet = new RemoveNotePacket(x, y);
+                    server.SendToAllClientsAsync(packet);
+                }
+                RemoveBlockRaw(x, y);
+            }
+        }
+
+        private void RemoveBlockRaw(int x, int y) {
             NoteBlocksRemoved++;
 
             if (notes.ContainsKey(x) && notes[x].ContainsKey(y)) {

@@ -32,8 +32,8 @@
             settingsToolStripMenuItem = new ToolStripMenuItem();
             connectToolStripMenuItem = new ToolStripMenuItem();
             tsi_HostJoin = new ToolStripMenuItem();
-            stopHostingToolStripMenuItem = new ToolStripMenuItem();
-            disconnectToolStripMenuItem = new ToolStripMenuItem();
+            tsi_StopHosting = new ToolStripMenuItem();
+            tsi_Disconnect = new ToolStripMenuItem();
             btnSave = new Button();
             btnPlay = new Button();
             btnStop = new Button();
@@ -131,7 +131,7 @@
             // 
             // connectToolStripMenuItem
             // 
-            connectToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { tsi_HostJoin, stopHostingToolStripMenuItem, disconnectToolStripMenuItem });
+            connectToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { tsi_HostJoin, tsi_StopHosting, tsi_Disconnect });
             connectToolStripMenuItem.ForeColor = Color.DimGray;
             connectToolStripMenuItem.Name = "connectToolStripMenuItem";
             connectToolStripMenuItem.Size = new Size(64, 20);
@@ -144,19 +144,20 @@
             tsi_HostJoin.Text = "Host / Join";
             tsi_HostJoin.Click += tsi_HostJoin_Click;
             // 
-            // stopHostingToolStripMenuItem
+            // tsi_StopHosting
             // 
-            stopHostingToolStripMenuItem.Enabled = false;
-            stopHostingToolStripMenuItem.Name = "stopHostingToolStripMenuItem";
-            stopHostingToolStripMenuItem.Size = new Size(180, 22);
-            stopHostingToolStripMenuItem.Text = "Stop Hosting";
+            tsi_StopHosting.Enabled = false;
+            tsi_StopHosting.Name = "tsi_StopHosting";
+            tsi_StopHosting.Size = new Size(180, 22);
+            tsi_StopHosting.Text = "Stop Hosting";
+            tsi_StopHosting.Click += tsi_StopHosting_Click;
             // 
-            // disconnectToolStripMenuItem
+            // tsi_Disconnect
             // 
-            disconnectToolStripMenuItem.Enabled = false;
-            disconnectToolStripMenuItem.Name = "disconnectToolStripMenuItem";
-            disconnectToolStripMenuItem.Size = new Size(180, 22);
-            disconnectToolStripMenuItem.Text = "Disconnect";
+            tsi_Disconnect.Enabled = false;
+            tsi_Disconnect.Name = "tsi_Disconnect";
+            tsi_Disconnect.Size = new Size(180, 22);
+            tsi_Disconnect.Text = "Disconnect";
             // 
             // btnSave
             // 
@@ -760,8 +761,8 @@
         private ToolStripStatusLabel tsl_LastTickMS;
         private ToolStripMenuItem connectToolStripMenuItem;
         private ToolStripMenuItem tsi_HostJoin;
-        private ToolStripMenuItem stopHostingToolStripMenuItem;
-        private ToolStripMenuItem disconnectToolStripMenuItem;
+        private ToolStripMenuItem tsi_StopHosting;
+        private ToolStripMenuItem tsi_Disconnect;
     }
 }
 
